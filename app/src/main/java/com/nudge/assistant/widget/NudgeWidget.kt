@@ -106,7 +106,19 @@ class NudgeWidget : AppWidgetProvider() {
                     R.id.headline,
                     if (watching) "Nothing needs you right now." else "Not watching yet."
                 )
-                v.setTextViewText(R.id.watching, asideFor(watching, filed.size, settings))
+                // The chips say what is being watched, so the line under the headline is only
+                // for what they cannot: that nothing is watching, or what is sitting on file.
+                val aside = asideFor(watching, filed.size, settings)
+                v.setTextViewText(R.id.watching, aside)
+                v.setViewVisibility(R.id.watching, if (aside.isEmpty()) View.GONE else View.VISIBLE)
+
+                // A chip per thing switched on, each in that kind's colour. With nothing due
+                // these and the rail are the only colour on the widget, and nothing due is
+                // what it shows nearly all of the time.
+                v.setViewVisibility(R.id.chips, if (watching) View.VISIBLE else View.GONE)
+                v.setViewVisibility(R.id.chip_reply, show(settings?.replyOn ?: true))
+                v.setViewVisibility(R.id.chip_leave, show(settings?.leaveOn ?: true))
+                v.setViewVisibility(R.id.chip_bill, show(settings?.billOn ?: true))
             }
 
             val hidden = needing.size + coming.size - rows.size
@@ -117,24 +129,19 @@ class NudgeWidget : AppWidgetProvider() {
             return v
         }
 
+        private fun show(on: Boolean) = if (on) View.VISIBLE else View.GONE
+
         /**
-         * The dim line under the headline, on a widget with nothing to list. Bills on file come
-         * first because they are the one thing the app knows that is otherwise invisible until
-         * the morning before they are due.
+         * The dim line under the headline, on a widget with nothing to list, and empty when the
+         * chips already say it. Bills on file come first because they are the one thing the app
+         * knows that is otherwise invisible until the morning before they are due.
          */
         private fun asideFor(watching: Boolean, filed: Int, s: Settings?): String = when {
             !watching -> "Tap to finish setting up."
             filed == 1 -> "One bill on file."
             filed > 1 -> "$filed bills on file."
-            s == null -> "Messages · Calendar · Bills"
-            else -> {
-                val on = buildList {
-                    if (s.replyOn) add("Messages")
-                    if (s.leaveOn) add("Calendar")
-                    if (s.billOn) add("Bills")
-                }
-                if (on.isEmpty()) "Nothing switched on." else on.joinToString(" · ")
-            }
+            s != null && !s.replyOn && !s.leaveOn && !s.billOn -> "Nothing switched on."
+            else -> ""
         }
 
         /**

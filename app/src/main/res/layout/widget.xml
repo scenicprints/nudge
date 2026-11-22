@@ -1,111 +1,183 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    The widget. A header that is always true, a hairline, and then either the rows or, when
-    there is nothing to list, the companion and a line about what is being watched.
+    The widget. A tricolour rail down the left, then a header that is always true, a hairline,
+    and either the rows or, with nothing to list, the headline and a chip per thing it watches.
+
+    The rail and the chips are there when nothing is due, which is the state this widget is in
+    almost all of the time and so the one that has to be worth looking at.
 
     The status is declared twice and the code shows one, so that the amber and the grey each
     come from a colour resource with a night variant rather than being resolved at runtime
     against the launcher's configuration instead of its own.
 
-    Only views on the RemoteViews allowlist appear here, which is why the hairline is a
-    FrameLayout with a background and not a View.
+    Only views on the RemoteViews allowlist appear here, which is why the rail and the hairline
+    are FrameLayouts with a background and not Views.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:baselineAligned="false"
+    android:orientation="horizontal"
+    android:padding="14dp">
+
+    <FrameLayout
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/widget_rail" />
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:baselineAligned="false"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:letterSpacing="0.14"
-            android:maxLines="1"
-            android:text="@string/widget_brand"
-            android:textColor="@color/widget_dim"
-            android:textSize="11sp" />
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/status_now"
-            android:layout_width="wrap_content"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:letterSpacing="0.14"
+                android:maxLines="1"
+                android:text="@string/widget_brand"
+                android:textColor="@color/widget_dim"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/status_now"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:textColor="@color/widget_now"
+                android:textSize="11sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/status_calm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="@string/widget_watching"
+                android:textColor="@color/widget_dim"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="9dp"
+            android:background="@color/widget_line" />
+
+        <LinearLayout
+            android:id="@+id/calm"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:maxLines="1"
-            android:textColor="@color/widget_now"
-            android:textSize="11sp"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/headline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="2"
+                android:text="@string/widget_calm"
+                android:textColor="@color/widget_ink"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/watching"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textColor="@color/widget_dim"
+                android:textSize="12sp"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/chips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chip_reply"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/widget_chip_reply"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:paddingLeft="9dp"
+                    android:paddingTop="3dp"
+                    android:paddingRight="9dp"
+                    android:paddingBottom="4dp"
+                    android:text="@string/widget_chip_messages"
+                    android:textColor="@color/widget_bg"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/chip_leave"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/widget_chip_leave"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:paddingLeft="9dp"
+                    android:paddingTop="3dp"
+                    android:paddingRight="9dp"
+                    android:paddingBottom="4dp"
+                    android:text="@string/widget_chip_calendar"
+                    android:textColor="@color/widget_bg"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:id="@+id/chip_bill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/widget_chip_bill"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:paddingLeft="9dp"
+                    android:paddingTop="3dp"
+                    android:paddingRight="9dp"
+                    android:paddingBottom="4dp"
+                    android:text="@string/widget_chip_bills"
+                    android:textColor="@color/widget_bg"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rows"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="9dp"
+            android:orientation="vertical"
             android:visibility="gone" />
 
         <TextView
-            android:id="@+id/status_calm"
-            android:layout_width="wrap_content"
+            android:id="@+id/more"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:maxLines="1"
-            android:text="@string/widget_watching"
             android:textColor="@color/widget_dim"
-            android:textSize="11sp" />
+            android:textSize="12sp"
+            android:visibility="gone" />
     </LinearLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="9dp"
-        android:background="@color/widget_line" />
-
-    <LinearLayout
-        android:id="@+id/calm"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/headline"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="sans-serif-medium"
-            android:maxLines="2"
-            android:text="@string/widget_calm"
-            android:textColor="@color/widget_ink"
-            android:textSize="17sp" />
-
-        <TextView
-            android:id="@+id/watching"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:text="@string/widget_sources"
-            android:textColor="@color/widget_dim"
-            android:textSize="12sp" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/rows"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="9dp"
-        android:orientation="vertical"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/more"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:maxLines="1"
-        android:textColor="@color/widget_dim"
-        android:textSize="12sp"
-        android:visibility="gone" />
 </LinearLayout>

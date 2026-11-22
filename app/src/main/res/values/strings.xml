@@ -10,5 +10,9 @@
     <string name="widget_brand">NUDGE</string>
     <string name="widget_watching">Watching</string>
     <string name="widget_calm">Nothing needs you right now.</string>
-    <string name="widget_sources">Messages · Calendar · Bills</string>
+
+    <!-- One chip per thing being watched, each in that kind's colour. -->
+    <string name="widget_chip_messages">Messages</string>
+    <string name="widget_chip_calendar">Calendar</string>
+    <string name="widget_chip_bills">Bills</string>
 </resources>

@@ -16,10 +16,11 @@ before you need to go, with a Navigate button.
 mentioned again at 9 the morning before the due date.
 
 **On the home screen.** A widget lists what is waiting on you, a coloured dot per kind, and
-opens the app when tapped. With nothing to list it says what it is watching, so that a quiet
-widget reads as on rather than as broken, and it names any bills on file, which are otherwise
-invisible until the morning before they are due. A reply nudge shows who is waiting but not
-what they said, because a home screen is visible to anyone who can see the phone.
+opens the app when tapped. A tricolour rail runs down its left whatever is happening, and with
+nothing due it shows a chip per thing it is watching, so the state it is in nearly all of the
+time is the one worth looking at. It names any bills on file too, which are otherwise invisible
+until the morning before they are due. A reply nudge shows who is waiting but not what they
+said, because a home screen is visible to anyone who can see the phone.
 
 Quiet hours hold everything overnight except time to leave.
 
@@ -86,9 +87,13 @@ returns a `Nudge` or nothing. Behaviour changes go there, with a case in `Engine
   and `res/values-night/colors.xml`. Change a colour in one place and change it in the other.
 
   It has four states and each says something true: a count and a row per nudge when something
-  is waiting; the same rows, grey, when something is only coming; what it is watching when
-  there is nothing on file; and what is missing when it is not watching. The headline appears
-  only in the last two, because with rows on screen it would just restate them.
+  is waiting; the same rows, grey, when something is only coming; a chip per thing it watches
+  when there is nothing on file; and what is missing when it is not watching. The headline
+  appears only in the last two, because with rows on screen it would just restate them.
+
+  The rail and the chips are deliberately on the state with nothing due. Colour that only
+  arrives with a nudge is colour you almost never see, because a widget with nothing waiting is
+  what this one shows nearly all of the time.
 
 ## Building
 
