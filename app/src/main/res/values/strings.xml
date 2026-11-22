@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_description">What is waiting on you, on the home screen.</string>
+    <!-- What the widget reads before anything has happened, and in the widget picker. -->
+    <string name="widget_calm">Nothing needs you right now.</string>
+    <string name="widget_waiting">One thing needs you.</string>
+</resources>

@@ -21,6 +21,7 @@ import com.nudge.assistant.notify.Notifier
 import com.nudge.assistant.sources.CalendarSource
 import com.nudge.assistant.sources.Perms
 import com.nudge.assistant.sources.Places
+import com.nudge.assistant.widget.NudgeWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -90,11 +91,13 @@ object Brain {
         Store.load(c)
         val before = Store.flow.value
         Store.update(c, f)
-        val after = Store.flow.value.map { it.id }.toSet()
+        val now = Store.flow.value
+        val after = now.map { it.id }.toSet()
         before.filter { it.id !in after }.forEach {
             Notifier.cancel(c, it.id)
             it.sourceKey?.let(Live::forget)
         }
+        if (now != before) NudgeWidget.refresh(c)
     }
 
     private fun enabled(k: Kind, s: Settings) = when (k) {
@@ -129,6 +132,10 @@ object Brain {
         var next = upcoming.minOrNull()
         if (watchCalendar) next = minOf(next ?: Long.MAX_VALUE, now + RESCAN)
         setAlarm(c, next?.coerceAtLeast(now + 15_000))
+
+        // Catches what change() cannot see: a permission just granted, or a store edited
+        // directly by a notification button.
+        NudgeWidget.refresh(c)
     }
 
     private suspend fun planLeaves(c: Context, s: Settings, now: Long, zone: ZoneId) {

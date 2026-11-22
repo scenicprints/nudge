@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="window">#0F1012</color>
+
+    <!-- The dark half of the palette in ui/Theme.kt. See the note in values/colors.xml. -->
+    <color name="widget_bg">#FF191B1F</color>
+    <color name="widget_line">#FF2B2E34</color>
+    <color name="widget_ink">#FFECEBE6</color>
+    <color name="widget_dim">#FF9A9CA3</color>
+    <color name="widget_now">#FFFFB23E</color>
 </resources>

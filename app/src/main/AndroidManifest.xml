@@ -60,6 +60,19 @@
             android:name=".notify.ActionReceiver"
             android:exported="false" />
 
+        <!-- The home screen widget. Redrawn by Brain, not on a timer. -->
+        <receiver
+            android:name=".widget.NudgeWidget"
+            android:exported="true"
+            android:label="Nudge">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+
         <receiver
             android:name=".notify.BootReceiver"
             android:exported="true">

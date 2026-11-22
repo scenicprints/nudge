@@ -2,4 +2,15 @@
 <resources>
     <color name="window">#F4F3EF</color>
     <color name="icon_bg">#16181C</color>
+
+    <!--
+        The light half of the palette in ui/Theme.kt. The widget is drawn by the launcher from
+        RemoteViews, which cannot see a Compose theme, so the same colours live here too. Change
+        them in both places or the widget will drift away from the screen.
+    -->
+    <color name="widget_bg">#FFFFFFFF</color>
+    <color name="widget_line">#FFDDDBD4</color>
+    <color name="widget_ink">#FF17181B</color>
+    <color name="widget_dim">#FF63656C</color>
+    <color name="widget_now">#FF9A5B00</color>
 </resources>

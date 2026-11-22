@@ -15,6 +15,11 @@ before you need to go, with a Navigate button.
 **Bills due.** Any notification that reads like a payment-due notice is put on one list, and
 mentioned again at 9 the morning before the due date.
 
+**On the home screen.** A widget lists what is waiting on you — amber for the nudges that
+have already spoken up, grey for what is still coming — and opens the app when tapped. A reply
+nudge there shows who is waiting but not what they said, because a home screen is visible to
+anyone who can see the phone.
+
 Quiet hours hold everything overnight except time to leave.
 
 ## What it cannot know
@@ -60,6 +65,11 @@ returns a `Nudge` or nothing. Behaviour changes go there, with a case in `Engine
 - `data/Store.kt` is every nudge on file, mirrored to one JSON file.
 - `ui/Home.kt` is the whole screen and holds no logic. `ui/Theme.kt` is the palette: grey, and
   one amber that means "this is waiting on you" and is used for nothing else.
+- `widget/NudgeWidget.kt` is the home screen widget, built with RemoteViews rather than Glance
+  so that it adds no dependency. `Brain` redraws it whenever the list changes, so it asks for
+  no update period of its own and never wakes the device on its own account. A launcher cannot
+  see a Compose theme, so the palette is repeated as colour resources in `res/values/colors.xml`
+  and `res/values-night/colors.xml`. Change a colour in one place and change it in the other.
 
 ## Building
 
@@ -85,4 +95,5 @@ built it, and an APK from a different machine will not install over it.
 
 The engine has 23 passing tests, and the app compiles, lints clean and builds a release APK.
 It has not yet been run on a phone, so the screen has not been looked at and the notification
-listener, alarms and inline reply have not been exercised against real apps.
+listener, alarms and inline reply have not been exercised against real apps. The widget has
+not been placed on a home screen, so its size and wrapping are untested.

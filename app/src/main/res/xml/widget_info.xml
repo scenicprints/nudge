@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    updatePeriodMillis is 0 on purpose. A period would wake the device on a timer of its own;
+    instead Brain redraws the widget whenever the list changes, and it already wakes for every
+    nudge that is due. Nothing on the widget is written relative to now, so between those
+    redraws there is nothing to go stale.
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/widget_description"
+    android:initialLayout="@layout/widget"
+    android:minHeight="110dp"
+    android:minResizeHeight="70dp"
+    android:minResizeWidth="180dp"
+    android:minWidth="180dp"
+    android:previewLayout="@layout/widget"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellHeight="2"
+    android:targetCellWidth="4"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen" />
