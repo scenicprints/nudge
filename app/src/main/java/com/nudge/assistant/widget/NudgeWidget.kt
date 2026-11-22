@@ -27,10 +27,11 @@ import com.nudge.assistant.sources.Perms
  *
  *  - something waiting: an amber count in the header, and a row for each
  *  - nothing waiting but something coming: a grey header, and a row for each
- *  - nothing on file at all: what it is watching, so that a quiet widget still reads as on
- *  - not watching: what is missing, and a tap goes where it can be fixed
+ *  - nothing on file at all: the companion walking, and what it is watching
+ *  - not watching: the companion sat down, and what is missing
  *
- * The headline only appears in the last two. With rows on screen it would restate them.
+ * The headline and the companion appear only in the last two. With rows on screen the headline
+ * would restate them and there is no room for anything that is only there to be looked at.
  */
 class NudgeWidget : AppWidgetProvider() {
 
@@ -103,14 +104,17 @@ class NudgeWidget : AppWidgetProvider() {
 
             val empty = rows.isEmpty()
             v.setViewVisibility(R.id.rows, if (empty) View.GONE else View.VISIBLE)
-            v.setViewVisibility(R.id.headline, if (empty) View.VISIBLE else View.GONE)
-            v.setViewVisibility(R.id.watching, if (empty) View.VISIBLE else View.GONE)
+            v.setViewVisibility(R.id.calm, if (empty) View.VISIBLE else View.GONE)
             if (empty) {
                 v.setTextViewText(
                     R.id.headline,
                     if (watching) "Nothing needs you right now." else "Not watching yet."
                 )
                 v.setTextViewText(R.id.watching, asideFor(watching, filed.size, settings))
+                // The companion paces about while the app is doing its job and sits down when
+                // it is not. Which of the two is on screen is the whole of what it says.
+                v.setViewVisibility(R.id.pal, if (watching) View.VISIBLE else View.GONE)
+                v.setViewVisibility(R.id.pal_asleep, if (watching) View.GONE else View.VISIBLE)
             }
 
             val hidden = needing.size + coming.size - rows.size

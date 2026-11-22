@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Frame 3 of 4: left foot forward, body upright. See frame 1 for the scheme. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:bottom="15dp"
+        android:left="9dp"
+        android:right="9dp"
+        android:top="3dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/widget_dim" />
+        </shape>
+    </item>
+
+    <item
+        android:bottom="5dp"
+        android:left="10dp"
+        android:right="23dp"
+        android:top="30dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/widget_dim" />
+        </shape>
+    </item>
+
+    <item
+        android:bottom="3dp"
+        android:left="23dp"
+        android:right="10dp"
+        android:top="32dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/widget_dim" />
+        </shape>
+    </item>
+
+    <item
+        android:bottom="24dp"
+        android:left="20dp"
+        android:right="15dp"
+        android:top="11dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/widget_bg" />
+        </shape>
+    </item>
+</layer-list>

@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     The widget. A header that is always true, a hairline, and then either the rows or, when
-    there is nothing to list, a line about what is being watched.
+    there is nothing to list, the companion and a line about what is being watched.
 
     The status is declared twice and the code shows one, so that the amber and the grey each
     come from a colour resource with a night variant rather than being resolved at runtime
     against the launcher's configuration instead of its own.
 
-    Only views on the RemoteViews allowlist appear here, which is why the hairline is a
-    FrameLayout with a background and not a View.
+    Only views on the RemoteViews allowlist appear here. That is why the hairline is a
+    FrameLayout with a background rather than a View, why each companion frame is a
+    FrameLayout with a background rather than an ImageView with a src (a layer-list has no
+    intrinsic size, and a background fills the view's bounds exactly, so the insets inside
+    each frame mean the dp they say), and why the walk is a ViewFlipper: it is the one view
+    here that animates on its own. The launcher drives it, nothing wakes the device for it,
+    and it stops when the widget is not on screen.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
@@ -61,28 +66,85 @@
         android:layout_marginTop="9dp"
         android:background="@color/widget_line" />
 
-    <TextView
-        android:id="@+id/headline"
+    <LinearLayout
+        android:id="@+id/calm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:ellipsize="end"
-        android:fontFamily="sans-serif-medium"
-        android:maxLines="2"
-        android:text="@string/widget_calm"
-        android:textColor="@color/widget_ink"
-        android:textSize="17sp" />
+        android:layout_marginTop="10dp"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/watching"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:text="@string/widget_sources"
-        android:textColor="@color/widget_dim"
-        android:textSize="12sp" />
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="12dp">
+
+            <ViewFlipper
+                android:id="@+id/pal"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:autoStart="true"
+                android:flipInterval="430">
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/widget_pal_1" />
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/widget_pal_2" />
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/widget_pal_3" />
+
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/widget_pal_4" />
+            </ViewFlipper>
+
+            <FrameLayout
+                android:id="@+id/pal_asleep"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/widget_pal_asleep"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/headline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="2"
+                android:text="@string/widget_calm"
+                android:textColor="@color/widget_ink"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/watching"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="@string/widget_sources"
+                android:textColor="@color/widget_dim"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/rows"

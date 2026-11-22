@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    The companion, frame 1 of 4. Right foot forward, body upright.
+
+    Every frame is a layer-list of ovals placed by inset inside a 40dp box, so the drawing is
+    arithmetic rather than path data: a shape cannot come out crooked, and a frame can be read
+    and corrected by looking at the numbers. Keep the box 40dp and the insets will hold.
+
+    The eye is the panel colour, so it reads as a hole in the body rather than a dot on it.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- body: 22 x 22, centred -->
+    <item
+        android:bottom="15dp"
+        android:left="9dp"
+        android:right="9dp"
+        android:top="3dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/widget_dim" />
+        </shape>
+    </item>
+
+    <!-- left foot: 7 x 5, planted -->
+    <item
+        android:bottom="3dp"
+        android:left="10dp"
+        android:right="23dp"
+        android:top="32dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/widget_dim" />
+        </shape>
+    </item>
+
+    <!-- right foot: 7 x 5, lifted 2dp -->
+    <item
+        android:bottom="5dp"
+        android:left="23dp"
+        android:right="10dp"
+        android:top="30dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/widget_dim" />
+        </shape>
+    </item>
+
+    <!-- eye: 5 x 5, right of centre, so it faces the way it walks -->
+    <item
+        android:bottom="24dp"
+        android:left="20dp"
+        android:right="15dp"
+        android:top="11dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/widget_bg" />
+        </shape>
+    </item>
+</layer-list>
