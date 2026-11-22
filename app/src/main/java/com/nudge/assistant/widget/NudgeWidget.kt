@@ -27,11 +27,10 @@ import com.nudge.assistant.sources.Perms
  *
  *  - something waiting: an amber count in the header, and a row for each
  *  - nothing waiting but something coming: a grey header, and a row for each
- *  - nothing on file at all: the companion walking, and what it is watching
- *  - not watching: the companion sat down, and what is missing
+ *  - nothing on file at all: what it is watching
+ *  - not watching: what is missing, and a tap goes where it can be fixed
  *
- * The headline and the companion appear only in the last two. With rows on screen the headline
- * would restate them and there is no room for anything that is only there to be looked at.
+ * The headline appears only in the last two. With rows on screen it would restate them.
  */
 class NudgeWidget : AppWidgetProvider() {
 
@@ -91,10 +90,7 @@ class NudgeWidget : AppWidgetProvider() {
             val rows = (needing + coming).take(ROWS)
             for (n in rows) {
                 val row = RemoteViews(c.packageName, R.layout.widget_row)
-                row.setImageViewResource(
-                    R.id.dot,
-                    if (n.announced) R.drawable.widget_dot_now else R.drawable.widget_dot_coming
-                )
+                row.setImageViewResource(R.id.dot, dotFor(n.kind, n.announced))
                 row.setTextViewText(R.id.row_title, n.title)
                 val body = bodyOf(n.kind, n.body)
                 row.setTextViewText(R.id.row_body, body)
@@ -111,10 +107,6 @@ class NudgeWidget : AppWidgetProvider() {
                     if (watching) "Nothing needs you right now." else "Not watching yet."
                 )
                 v.setTextViewText(R.id.watching, asideFor(watching, filed.size, settings))
-                // The companion paces about while the app is doing its job and sits down when
-                // it is not. Which of the two is on screen is the whole of what it says.
-                v.setViewVisibility(R.id.pal, if (watching) View.VISIBLE else View.GONE)
-                v.setViewVisibility(R.id.pal_asleep, if (watching) View.GONE else View.VISIBLE)
             }
 
             val hidden = needing.size + coming.size - rows.size
@@ -143,6 +135,18 @@ class NudgeWidget : AppWidgetProvider() {
                 }
                 if (on.isEmpty()) "Nothing switched on." else on.joinToString(" · ")
             }
+        }
+
+        /**
+         * The dot on a row. Colour says which of the three it is, and only a nudge that has
+         * spoken up gets any: on the screen and here alike, colour means this is waiting on
+         * you, so one that is still on the clock stays grey.
+         */
+        private fun dotFor(kind: Kind, announced: Boolean): Int = when {
+            !announced -> R.drawable.widget_dot_coming
+            kind == Kind.REPLY -> R.drawable.widget_dot_reply
+            kind == Kind.LEAVE -> R.drawable.widget_dot_leave
+            else -> R.drawable.widget_dot_bill
         }
 
         /**

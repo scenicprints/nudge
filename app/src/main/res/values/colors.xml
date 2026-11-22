@@ -13,4 +13,9 @@
     <color name="widget_ink">#FF17181B</color>
     <color name="widget_dim">#FF63656C</color>
     <color name="widget_now">#FF9A5B00</color>
+
+    <!-- One per kind, for the dot on a row that has spoken up. -->
+    <color name="widget_reply">#FF155E99</color>
+    <color name="widget_leave">#FF5B35A6</color>
+    <color name="widget_bill">#FF2E7320</color>
 </resources>

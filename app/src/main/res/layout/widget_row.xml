@@ -13,7 +13,7 @@
         android:layout_marginTop="7dp"
         android:layout_marginEnd="10dp"
         android:importantForAccessibility="no"
-        android:src="@drawable/widget_dot_now" />
+        android:src="@drawable/widget_dot_coming" />
 
     <LinearLayout
         android:layout_width="0dp"

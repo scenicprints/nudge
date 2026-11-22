@@ -37,14 +37,15 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -99,6 +100,8 @@ fun Home(
     updateLabel: String,
     labelOf: (String) -> String,
     on: HomeEvents,
+    /** Bumped whenever something outside the app asks for it. Brings the nudges back up. */
+    opens: Int = 0,
     zone: ZoneId = ZoneId.systemDefault()
 ) {
     val shown = nudges.filter { !it.dismissed }
@@ -107,9 +110,15 @@ fun Home(
     val filed = shown.filter { !it.announced && it.fireAt == NEVER }
     val setup = missing(perms, settings)
 
-    // Two pages, so a flag and not a navigation library. Saved, so that turning the phone
-    // does not throw you back to the list.
-    var showSettings by rememberSaveable { mutableStateOf(false) }
+    // Two pages, so a flag and not a navigation library.
+    //
+    // Deliberately remember and not rememberSaveable. Saved state outlives the activity, so a
+    // settings page left open came back on the next launch: tapping the widget or a nudge
+    // opened the app on Settings. The nudges are what the app is for, and anything that opens
+    // it is asking for those. [opens] counts the intents that arrive while the app is already
+    // running, which singleTask delivers without rebuilding anything, so those come home too.
+    var showSettings by remember { mutableStateOf(false) }
+    LaunchedEffect(opens) { showSettings = false }
     BackHandler(enabled = showSettings) { showSettings = false }
 
     if (showSettings) {
@@ -332,7 +341,14 @@ private fun Rule() {
 }
 
 @Composable
-private fun Pill(text: String, filled: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
+private fun Pill(
+    text: String,
+    filled: Boolean,
+    enabled: Boolean = true,
+    /** The fill, when this is the thing to do about a nudge. Ink when left out. */
+    tint: Color? = null,
+    onClick: () -> Unit
+) {
     val p = LocalPalette.current
     // 48dp of touch height around a 38dp shape.
     Box(
@@ -342,7 +358,7 @@ private fun Pill(text: String, filled: Boolean, enabled: Boolean = true, onClick
         Box(
             Modifier.height(38.dp).clip(RoundedCornerShape(19.dp))
                 .then(
-                    if (filled) Modifier.background(p.ink)
+                    if (filled) Modifier.background(tint ?: p.ink)
                     else Modifier.border(1.dp, p.line, RoundedCornerShape(19.dp))
                 )
                 .padding(horizontal = 16.dp),
@@ -427,19 +443,25 @@ private fun Card(n: Nudge, live: Boolean, now: Long, zone: ZoneId, labelOf: (Str
     val p = LocalPalette.current
     var replying by remember(n.id) { mutableStateOf(false) }
     var draft by remember(n.id) { mutableStateOf("") }
+    // Which of the three this is. Shown only once it is live, so that colour on the screen
+    // always means the same thing: this one is waiting on you.
+    val accent = when (n.kind) {
+        Kind.REPLY -> p.reply
+        Kind.LEAVE -> p.leave
+        Kind.BILL -> p.bill
+    }
 
     Row(
         Modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(RoundedCornerShape(18.dp)).background(p.panel)
             .border(1.dp, p.line, RoundedCornerShape(18.dp))
     ) {
-        // The rail is the only place the accent appears: this one is waiting on you.
-        Box(Modifier.width(4.dp).fillMaxHeight().background(if (live) p.now else p.panel))
+        Box(Modifier.width(4.dp).fillMaxHeight().background(if (live) accent else p.panel))
         Column(Modifier.weight(1f).padding(start = 12.dp, end = 16.dp, top = 14.dp, bottom = 6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     listOfNotNull(kindWord(n.kind), n.pkg?.let(labelOf).takeIf { n.kind != Kind.BILL })
                         .joinToString("  ·  ").uppercase(),
-                    style = Type.label, color = if (live) p.now else p.dim,
+                    style = Type.label, color = if (live) accent else p.dim,
                     maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
                 )
                 Text(meta(n, live, now, zone), style = Type.label, color = p.dim, maxLines = 1)
@@ -485,12 +507,13 @@ private fun Card(n: Nudge, live: Boolean, now: Long, zone: ZoneId, labelOf: (Str
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 when (n.kind) {
                     Kind.REPLY -> {
-                        if (!replying) Pill("Reply", filled = live) { replying = true }
+                        if (!replying) Pill("Reply", filled = live, tint = accent) { replying = true }
                         Pill("Open", filled = false) { on.open(n) }
                         if (live) Pill("In an hour", filled = false) { on.later(n) }
                     }
-                    Kind.LEAVE -> Pill("Navigate", filled = live) { on.open(n) }
-                    Kind.BILL -> Pill("Open ${n.pkg?.let(labelOf) ?: "app"}", filled = false) { on.open(n) }
+                    Kind.LEAVE -> Pill("Navigate", filled = live, tint = accent) { on.open(n) }
+                    Kind.BILL ->
+                        Pill("Open ${n.pkg?.let(labelOf) ?: "app"}", filled = live, tint = accent) { on.open(n) }
                 }
                 Pill("Done", filled = false) { on.done(n) }
             }

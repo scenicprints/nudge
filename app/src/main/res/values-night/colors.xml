@@ -8,4 +8,8 @@
     <color name="widget_ink">#FFECEBE6</color>
     <color name="widget_dim">#FF9A9CA3</color>
     <color name="widget_now">#FFFFB23E</color>
+
+    <color name="widget_reply">#FF5AA9F0</color>
+    <color name="widget_leave">#FFB693F7</color>
+    <color name="widget_bill">#FF7CC95F</color>
 </resources>

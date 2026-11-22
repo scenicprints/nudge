@@ -14,8 +14,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 /**
- * The whole palette. Grey on grey, and one amber that means exactly one thing: this needs you
- * now. It is not used for buttons, switches or decoration, so when it appears it is news.
+ * The whole palette. Grey on grey, and colour that carries one meaning: this needs you now.
+ *
+ * [now] is the app's own accent, for the line under the title and the count on the widget.
+ * [reply], [leave] and [bill] say which of the three a nudge is. A nudge that is only coming
+ * is drawn in grey and takes its colour when it speaks up, so colour never appears as
+ * decoration: where you see it, something is waiting.
+ *
+ * The dark set is bright enough to carry on the dark panel and the light set dark enough to
+ * carry on white, which is also what lets [ground] be used for text on top of any of them.
  */
 data class Palette(
     val ground: Color,
@@ -24,7 +31,10 @@ data class Palette(
     val ink: Color,
     val dim: Color,
     val now: Color,
-    val onNow: Color
+    val onNow: Color,
+    val reply: Color,
+    val leave: Color,
+    val bill: Color
 )
 
 private val Dark = Palette(
@@ -34,7 +44,10 @@ private val Dark = Palette(
     ink = Color(0xFFECEBE6),
     dim = Color(0xFF9A9CA3),
     now = Color(0xFFFFB23E),
-    onNow = Color(0xFF1B1300)
+    onNow = Color(0xFF1B1300),
+    reply = Color(0xFF5AA9F0),
+    leave = Color(0xFFB693F7),
+    bill = Color(0xFF7CC95F)
 )
 
 private val Light = Palette(
@@ -44,7 +57,10 @@ private val Light = Palette(
     ink = Color(0xFF17181B),
     dim = Color(0xFF63656C),
     now = Color(0xFF9A5B00),
-    onNow = Color(0xFFFFFFFF)
+    onNow = Color(0xFFFFFFFF),
+    reply = Color(0xFF155E99),
+    leave = Color(0xFF5B35A6),
+    bill = Color(0xFF2E7320)
 )
 
 val LocalPalette = staticCompositionLocalOf { Dark }

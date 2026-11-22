@@ -15,13 +15,11 @@ before you need to go, with a Navigate button.
 **Bills due.** Any notification that reads like a payment-due notice is put on one list, and
 mentioned again at 9 the morning before the due date.
 
-**On the home screen.** A widget lists what is waiting on you — amber for the nudges that
-have already spoken up, grey for what is still coming — and opens the app when tapped. With
-nothing to list a small companion walks about next to what it is watching, so that a quiet
+**On the home screen.** A widget lists what is waiting on you, a coloured dot per kind, and
+opens the app when tapped. With nothing to list it says what it is watching, so that a quiet
 widget reads as on rather than as broken, and it names any bills on file, which are otherwise
-invisible until the morning before they are due. When it is not watching, the companion is sat
-down. A reply nudge shows who is waiting but not what they said, because a home screen is
-visible to anyone who can see the phone.
+invisible until the morning before they are due. A reply nudge shows who is waiting but not
+what they said, because a home screen is visible to anyone who can see the phone.
 
 Quiet hours hold everything overnight except time to leave.
 
@@ -69,9 +67,18 @@ returns a `Nudge` or nothing. Behaviour changes go there, with a case in `Engine
 - `ui/Home.kt` is both screens and holds no logic. `NudgesPage` is what the app opens on —
   what is waiting, what is coming, what is on file, and anything still to be granted.
   `SettingsPage` is what to watch, quiet hours and the version, behind the Settings button,
-  because none of it is about today. Two pages is a saved flag and a `BackHandler`, not a
-  navigation library. `ui/Theme.kt` is the palette: grey, and one amber that means "this is
-  waiting on you" and is used for nothing else.
+  because none of it is about today. Two pages is a flag and a `BackHandler`, not a
+  navigation library. Which page you are on is not saved: anything that opens the app is
+  asking for the nudges, so a tap on the widget or a nudge comes home rather than reopening
+  wherever you last were.
+- `ui/Theme.kt` is the palette. Grey, and colour that means one thing: this is waiting on you.
+  `now` is the app's own amber, for the line under the title and the count on the widget.
+  `reply`, `leave` and `bill` say which of the three a nudge is, on its rail, its kind label,
+  its button and its dot on the widget. A nudge that is only coming is drawn in grey and takes
+  its colour when it speaks up, so colour is never decoration: where you see it, something is
+  waiting. The dark set is bright enough to carry on the dark panel and the light set dark
+  enough to carry on white, which is what lets `ground` be the text colour on top of any of
+  them. The widget repeats all of it in `res/values/colors.xml` and `res/values-night/colors.xml`.
 - `widget/NudgeWidget.kt` is the home screen widget, built with RemoteViews rather than Glance
   so that it adds no dependency. `Brain` redraws it whenever the list changes, so it asks for
   no update period of its own and never wakes the device on its own account. A launcher cannot
@@ -79,18 +86,9 @@ returns a `Nudge` or nothing. Behaviour changes go there, with a case in `Engine
   and `res/values-night/colors.xml`. Change a colour in one place and change it in the other.
 
   It has four states and each says something true: a count and a row per nudge when something
-  is waiting; the same rows in grey when something is only coming; the companion walking beside
-  what it is watching when there is nothing on file; and the companion sat down when it is not
-  watching. The headline and the companion appear only in the last two, because with rows on
-  screen the headline would restate them and the room is better spent on the rows.
-
-  The companion is a `ViewFlipper` of four `widget_pal_*` frames. A RemoteViews widget cannot
-  animate: it has no frame loop and no custom views, and the shortest update period Android
-  will honour is half an hour. `ViewFlipper` is the one view on the allowlist that moves by
-  itself, cycled by the launcher, waking nothing and stopping when the widget is off screen.
-  Each frame is a `layer-list` of ovals placed by inset in a 40dp box, so a frame is arithmetic
-  and can be corrected by reading its numbers. If a launcher ignores `autoStart`, frame one
-  stands still and nothing else changes.
+  is waiting; the same rows, grey, when something is only coming; what it is watching when
+  there is nothing on file; and what is missing when it is not watching. The headline appears
+  only in the last two, because with rows on screen it would just restate them.
 
 ## Building
 

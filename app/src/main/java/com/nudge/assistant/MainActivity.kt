@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,15 +37,28 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    /**
+     * How many times something outside the app has asked for it. The launch mode is singleTask,
+     * so a tap on the widget or a nudge arrives as a new intent on the activity that is already
+     * there, with nothing rebuilt; counting them is what lets the screen come home.
+     */
+    private val opens = mutableIntStateOf(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContent { NudgeTheme { Root() } }
+        setContent { NudgeTheme { Root(opens.intValue) } }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        opens.intValue++
     }
 }
 
 @Composable
-private fun Root() {
+private fun Root(opens: Int) {
     val c = LocalContext.current
     val activity = c as ComponentActivity
     val scope = rememberCoroutineScope()
@@ -155,6 +169,7 @@ private fun Root() {
         version = remember { runCatching { c.packageManager.getPackageInfo(c.packageName, 0).versionName }.getOrNull() ?: "" },
         updateLabel = updateLabel,
         labelOf = labelOf,
-        on = events
+        on = events,
+        opens = opens
     )
 }
