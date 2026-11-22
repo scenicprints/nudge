@@ -62,8 +62,11 @@ class NudgeListener : NotificationListenerService() {
         val replyAction = n.actions?.firstOrNull { a -> a.remoteInputs?.any { it.allowFreeFormInput } == true }
         val isMessage = n.category == Notification.CATEGORY_MESSAGE || extras.containsKey(Notification.EXTRA_MESSAGES)
 
-        if (isMessage && replyAction != null) {
-            Live.reply[sbn.key] = replyAction
+        // Whether the notification offers inline reply decides whether the nudge can carry a
+        // Reply button, and nothing else. It used to decide whether there was a nudge at all,
+        // which silently dropped every message from an app that does not offer one.
+        if (isMessage) {
+            if (replyAction != null) Live.reply[sbn.key] = replyAction
             n.contentIntent?.let { Live.open[sbn.key] = it }
             val last = lastMessage(extras)
             Brain.onMessage(
@@ -79,7 +82,7 @@ class NudgeListener : NotificationListenerService() {
                     lastFromSelf = last?.fromSelf ?: false
                 )
             )
-        } else if (!isMessage) {
+        } else {
             Brain.onPossibleBill(this, sbn.packageName, appLabel(sbn.packageName), title, text)
         }
     }
