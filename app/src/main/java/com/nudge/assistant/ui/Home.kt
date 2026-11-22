@@ -1,5 +1,6 @@
 package com.nudge.assistant.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,6 +27,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -38,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -98,38 +101,60 @@ fun Home(
     on: HomeEvents,
     zone: ZoneId = ZoneId.systemDefault()
 ) {
-    val p = LocalPalette.current
     val shown = nudges.filter { !it.dismissed }
     val current = shown.filter { it.announced }.sortedBy { it.expiresAt }
     val coming = shown.filter { it.isPending() }.sortedBy { it.fireAt }
     val filed = shown.filter { !it.announced && it.fireAt == NEVER }
     val setup = missing(perms, settings)
 
-    val insets = WindowInsets.safeDrawing.asPaddingValues()
-    val dir = LocalLayoutDirection.current
-    LazyColumn(
-        modifier = Modifier.fillMaxSize().background(p.ground),
-        contentPadding = PaddingValues(
-            start = insets.calculateStartPadding(dir) + 20.dp,
-            end = insets.calculateEndPadding(dir) + 20.dp,
-            top = insets.calculateTopPadding() + 28.dp,
-            bottom = insets.calculateBottomPadding() + 32.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
+    // Two pages, so a flag and not a navigation library. Saved, so that turning the phone
+    // does not throw you back to the list.
+    var showSettings by rememberSaveable { mutableStateOf(false) }
+    BackHandler(enabled = showSettings) { showSettings = false }
+
+    if (showSettings) {
+        SettingsPage(settings, version, updateLabel, on) { showSettings = false }
+    } else {
+        NudgesPage(current, coming, filed, setup, now, zone, labelOf, on) { showSettings = true }
+    }
+}
+
+/**
+ * The page the app opens on: what is waiting, what is coming, and what is on file. Setting up
+ * stays here rather than moving to the settings page, because an ungranted permission is not a
+ * preference — it is the app not working, and it belongs where it will be seen.
+ */
+@Composable
+private fun NudgesPage(
+    current: List<Nudge>,
+    coming: List<Nudge>,
+    filed: List<Nudge>,
+    setup: List<Setup>,
+    now: Long,
+    zone: ZoneId,
+    labelOf: (String) -> String,
+    on: HomeEvents,
+    openSettings: () -> Unit
+) {
+    val p = LocalPalette.current
+    Sheet {
         item {
-            Column(Modifier.padding(bottom = 14.dp)) {
-                Text("Nudge", style = Type.title, color = p.ink)
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    when {
-                        current.size == 1 -> "One thing needs you."
-                        current.size > 1 -> "${current.size} things need you."
-                        setup.any { it.grant == Grant.NOTIFICATION_ACCESS } -> "Not watching yet. Finish setting up below."
-                        else -> "Nothing needs you right now."
-                    },
-                    style = Type.body, color = if (current.isEmpty()) p.dim else p.now
-                )
+            Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.Top) {
+                Column(Modifier.weight(1f)) {
+                    Text("Nudge", style = Type.title, color = p.ink)
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        when {
+                            current.size == 1 -> "One thing needs you."
+                            current.size > 1 -> "${current.size} things need you."
+                            setup.any { it.grant == Grant.NOTIFICATION_ACCESS } -> "Not watching yet. Finish setting up below."
+                            else -> "Nothing needs you right now."
+                        },
+                        style = Type.body, color = if (current.isEmpty()) p.dim else p.now
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Pill("Settings", filled = false, onClick = openSettings)
             }
         }
 
@@ -163,6 +188,27 @@ fun Home(
         if (filed.isNotEmpty()) {
             item { Label("On file") }
             items(filed, key = { it.id }) { Card(it, live = false, now, zone, labelOf, on) }
+        }
+    }
+}
+
+/** What to watch, quiet hours and the version. Nothing here is about today. */
+@Composable
+private fun SettingsPage(
+    settings: Settings,
+    version: String,
+    updateLabel: String,
+    on: HomeEvents,
+    done: () -> Unit
+) {
+    val p = LocalPalette.current
+    Sheet {
+        item {
+            Row(Modifier.fillMaxWidth().padding(bottom = 14.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("Settings", style = Type.title, color = p.ink, modifier = Modifier.weight(1f))
+                Spacer(Modifier.width(12.dp))
+                Pill("Done", filled = false, onClick = done)
+            }
         }
 
         item { Label("What to watch") }
@@ -224,6 +270,25 @@ fun Home(
             }
         }
     }
+}
+
+/** The ground, the insets and the spacing, so that both pages sit the same way. */
+@Composable
+private fun Sheet(content: LazyListScope.() -> Unit) {
+    val p = LocalPalette.current
+    val insets = WindowInsets.safeDrawing.asPaddingValues()
+    val dir = LocalLayoutDirection.current
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().background(p.ground),
+        contentPadding = PaddingValues(
+            start = insets.calculateStartPadding(dir) + 20.dp,
+            end = insets.calculateEndPadding(dir) + 20.dp,
+            top = insets.calculateTopPadding() + 28.dp,
+            bottom = insets.calculateBottomPadding() + 32.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        content = content
+    )
 }
 
 private val REPLY_DELAYS = listOf(5, 10, 15, 30, 45, 60, 120, 240)

@@ -65,8 +65,12 @@ returns a `Nudge` or nothing. Behaviour changes go there, with a case in `Engine
   their buttons.
 - `sources/Sources.kt` is the calendar, position and geocoder.
 - `data/Store.kt` is every nudge on file, mirrored to one JSON file.
-- `ui/Home.kt` is the whole screen and holds no logic. `ui/Theme.kt` is the palette: grey, and
-  one amber that means "this is waiting on you" and is used for nothing else.
+- `ui/Home.kt` is both screens and holds no logic. `NudgesPage` is what the app opens on —
+  what is waiting, what is coming, what is on file, and anything still to be granted.
+  `SettingsPage` is what to watch, quiet hours and the version, behind the Settings button,
+  because none of it is about today. Two pages is a saved flag and a `BackHandler`, not a
+  navigation library. `ui/Theme.kt` is the palette: grey, and one amber that means "this is
+  waiting on you" and is used for nothing else.
 - `widget/NudgeWidget.kt` is the home screen widget, built with RemoteViews rather than Glance
   so that it adds no dependency. `Brain` redraws it whenever the list changes, so it asks for
   no update period of its own and never wakes the device on its own account. A launcher cannot
