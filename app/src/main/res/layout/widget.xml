@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    The widget. Both headlines are declared and the code shows one, so that the amber and the
-    grey each come from a colour resource with a night variant rather than being resolved at
-    runtime against the wrong configuration.
+    The widget. A header that is always true, a hairline, and then either the rows or, when
+    there is nothing to list, a line about what is being watched.
+
+    The status is declared twice and the code shows one, so that the amber and the grey each
+    come from a colour resource with a night variant rather than being resolved at runtime
+    against the launcher's configuration instead of its own.
+
+    Only views on the RemoteViews allowlist appear here, which is why the hairline is a
+    FrameLayout with a background and not a View.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
@@ -12,40 +18,85 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/headline_now"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:letterSpacing="0.14"
+            android:maxLines="1"
+            android:text="@string/widget_brand"
+            android:textColor="@color/widget_dim"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/status_now"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="1"
+            android:textColor="@color/widget_now"
+            android:textSize="11sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/status_calm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="1"
+            android:text="@string/widget_watching"
+            android:textColor="@color/widget_dim"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="9dp"
+        android:background="@color/widget_line" />
+
+    <TextView
+        android:id="@+id/headline"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         android:ellipsize="end"
         android:fontFamily="sans-serif-medium"
         android:maxLines="2"
-        android:text="@string/widget_waiting"
-        android:textColor="@color/widget_now"
-        android:textSize="16sp"
-        android:visibility="gone" />
+        android:text="@string/widget_calm"
+        android:textColor="@color/widget_ink"
+        android:textSize="17sp" />
 
     <TextView
-        android:id="@+id/headline_calm"
+        android:id="@+id/watching"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
         android:ellipsize="end"
         android:maxLines="2"
-        android:text="@string/widget_calm"
+        android:text="@string/widget_sources"
         android:textColor="@color/widget_dim"
-        android:textSize="15sp" />
+        android:textSize="12sp" />
 
     <LinearLayout
         android:id="@+id/rows"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:orientation="vertical" />
+        android:layout_marginTop="9dp"
+        android:orientation="vertical"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/more"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="5dp"
         android:maxLines="1"
         android:textColor="@color/widget_dim"
         android:textSize="12sp"

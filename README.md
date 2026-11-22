@@ -16,9 +16,11 @@ before you need to go, with a Navigate button.
 mentioned again at 9 the morning before the due date.
 
 **On the home screen.** A widget lists what is waiting on you — amber for the nudges that
-have already spoken up, grey for what is still coming — and opens the app when tapped. A reply
-nudge there shows who is waiting but not what they said, because a home screen is visible to
-anyone who can see the phone.
+have already spoken up, grey for what is still coming — and opens the app when tapped. With
+nothing to list it says what it is watching instead, so that a quiet widget still reads as on
+rather than as broken, and it names any bills on file, which are otherwise invisible until the
+morning before they are due. A reply nudge there shows who is waiting but not what they said,
+because a home screen is visible to anyone who can see the phone.
 
 Quiet hours hold everything overnight except time to leave.
 
@@ -70,6 +72,11 @@ returns a `Nudge` or nothing. Behaviour changes go there, with a case in `Engine
   no update period of its own and never wakes the device on its own account. A launcher cannot
   see a Compose theme, so the palette is repeated as colour resources in `res/values/colors.xml`
   and `res/values-night/colors.xml`. Change a colour in one place and change it in the other.
+
+  It has four states and each says something true: a count and a row per nudge when something
+  is waiting; the same rows in grey when something is only coming; what it is watching when
+  there is nothing on file; and what is missing when it is not watching. The headline appears
+  only in the last two, because with rows on screen it would just restate them.
 
 ## Building
 

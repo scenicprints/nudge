@@ -10,8 +10,11 @@ import android.view.View
 import android.widget.RemoteViews
 import com.nudge.assistant.MainActivity
 import com.nudge.assistant.R
+import com.nudge.assistant.data.Prefs
+import com.nudge.assistant.data.Settings
 import com.nudge.assistant.data.Store
 import com.nudge.assistant.engine.Kind
+import com.nudge.assistant.engine.NEVER
 import com.nudge.assistant.sources.Perms
 
 /**
@@ -20,8 +23,14 @@ import com.nudge.assistant.sources.Perms
  * Built with RemoteViews rather than Glance so that it adds no dependency, which keeps the
  * pinned-version list in `app/build.gradle.kts` as short as it is.
  *
- * It holds no logic of its own. It reads the store, groups it the way the screen does, and
- * draws at most [ROWS] lines. The one judgement it makes is in [bodyOf].
+ * It is in one of four states, and each of them says something true:
+ *
+ *  - something waiting: an amber count in the header, and a row for each
+ *  - nothing waiting but something coming: a grey header, and a row for each
+ *  - nothing on file at all: what it is watching, so that a quiet widget still reads as on
+ *  - not watching: what is missing, and a tap goes where it can be fixed
+ *
+ * The headline only appears in the last two. With rows on screen it would restate them.
  */
 class NudgeWidget : AppWidgetProvider() {
 
@@ -31,8 +40,8 @@ class NudgeWidget : AppWidgetProvider() {
     }
 
     companion object {
-        /** More than this and it stops being a glance. The headline says how many are hidden. */
-        private const val ROWS = 4
+        /** What fits two cells tall under the header. The header counts the rest. */
+        private const val ROWS = 3
 
         /**
          * Redraws every placed widget. It costs nothing when none is placed, so [Brain] calls
@@ -51,27 +60,31 @@ class NudgeWidget : AppWidgetProvider() {
         private fun build(c: Context): RemoteViews {
             Store.load(c)
             val shown = Store.flow.value.filter { !it.dismissed }
-            // The same two groups the screen shows under "Now" and "Coming up".
+            // The same three groups the screen shows under Now, Coming up and On file.
             val needing = shown.filter { it.announced }.sortedBy { it.expiresAt }
             val coming = shown.filter { it.isPending() }.sortedBy { it.fireAt }
-            // A failed read should not make the widget claim it is not watching.
+            val filed = shown.filter { !it.announced && it.fireAt == NEVER }
+            // Neither failure should make the widget claim something untrue about itself.
             val watching = runCatching { Perms.read(c).notificationAccess }.getOrDefault(true)
+            val settings = runCatching { Prefs.settings(c) }.getOrNull()
 
             val v = RemoteViews(c.packageName, R.layout.widget)
             v.setOnClickPendingIntent(R.id.widget_root, open(c))
 
-            val headline = when {
-                needing.size == 1 -> "One thing needs you."
-                needing.size > 1 -> "${needing.size} things need you."
-                !watching -> "Not watching yet."
-                else -> "Nothing needs you right now."
-            }
-            // Amber means this is waiting on you and is used for nothing else, so the headline
-            // is two views and only the one that tells the truth is shown.
+            // The count is the only amber on an otherwise grey widget, and it carries the same
+            // meaning amber carries everywhere else here: this is waiting on you.
             val waiting = needing.isNotEmpty()
-            v.setTextViewText(if (waiting) R.id.headline_now else R.id.headline_calm, headline)
-            v.setViewVisibility(R.id.headline_now, if (waiting) View.VISIBLE else View.GONE)
-            v.setViewVisibility(R.id.headline_calm, if (waiting) View.GONE else View.VISIBLE)
+            val status = when {
+                waiting -> "${needing.size} waiting"
+                !watching -> "Not watching"
+                // A reply nudge sits on a clock before it speaks up. Saying only "Watching"
+                // while one is already on the list reads as though nothing were there.
+                coming.isNotEmpty() -> "${coming.size} coming"
+                else -> "Watching"
+            }
+            v.setTextViewText(if (waiting) R.id.status_now else R.id.status_calm, status)
+            v.setViewVisibility(R.id.status_now, if (waiting) View.VISIBLE else View.GONE)
+            v.setViewVisibility(R.id.status_calm, if (waiting) View.GONE else View.VISIBLE)
 
             v.removeAllViews(R.id.rows)
             val rows = (needing + coming).take(ROWS)
@@ -88,12 +101,44 @@ class NudgeWidget : AppWidgetProvider() {
                 v.addView(R.id.rows, row)
             }
 
+            val empty = rows.isEmpty()
+            v.setViewVisibility(R.id.rows, if (empty) View.GONE else View.VISIBLE)
+            v.setViewVisibility(R.id.headline, if (empty) View.VISIBLE else View.GONE)
+            v.setViewVisibility(R.id.watching, if (empty) View.VISIBLE else View.GONE)
+            if (empty) {
+                v.setTextViewText(
+                    R.id.headline,
+                    if (watching) "Nothing needs you right now." else "Not watching yet."
+                )
+                v.setTextViewText(R.id.watching, asideFor(watching, filed.size, settings))
+            }
+
             val hidden = needing.size + coming.size - rows.size
             if (hidden > 0) {
                 v.setTextViewText(R.id.more, if (hidden == 1) "and one more" else "and $hidden more")
             }
             v.setViewVisibility(R.id.more, if (hidden > 0) View.VISIBLE else View.GONE)
             return v
+        }
+
+        /**
+         * The dim line under the headline, on a widget with nothing to list. Bills on file come
+         * first because they are the one thing the app knows that is otherwise invisible until
+         * the morning before they are due.
+         */
+        private fun asideFor(watching: Boolean, filed: Int, s: Settings?): String = when {
+            !watching -> "Tap to finish setting up."
+            filed == 1 -> "One bill on file."
+            filed > 1 -> "$filed bills on file."
+            s == null -> "Messages · Calendar · Bills"
+            else -> {
+                val on = buildList {
+                    if (s.replyOn) add("Messages")
+                    if (s.leaveOn) add("Calendar")
+                    if (s.billOn) add("Bills")
+                }
+                if (on.isEmpty()) "Nothing switched on." else on.joinToString(" · ")
+            }
         }
 
         /**
