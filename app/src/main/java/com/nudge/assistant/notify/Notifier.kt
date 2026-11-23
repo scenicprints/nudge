@@ -61,7 +61,10 @@ object Notifier {
             .setAutoCancel(true)
             .setOnlyAlertOnce(true)
             .setContentIntent(activity(c, Actions.openIntent(c, n), n.id))
-            .setDeleteIntent(broadcast(c, ActionReceiver.DONE, n.id))
+            // Deliberately no delete intent. Clearing the shade is housekeeping, not an answer,
+            // so a swiped nudge stays on file and keeps showing in the app and the widget. Only
+            // the Done button marks it done. This is the same reading the reply rule gives a
+            // swiped message: see ReplyRule.handledBy.
 
         when (n.kind) {
             Kind.REPLY -> {

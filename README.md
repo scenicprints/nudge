@@ -24,6 +24,9 @@ said, because a home screen is visible to anyone who can see the phone.
 
 Quiet hours hold everything overnight except time to leave.
 
+Swiping a nudge away only clears the shade. The nudge stays in the app and on the widget until
+it expires or you press Done, because clearing a notification is housekeeping and not an answer.
+
 ## What it cannot know
 
 These are limits of what Android lets an app see, not things left undone.
