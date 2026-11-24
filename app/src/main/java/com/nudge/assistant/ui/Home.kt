@@ -54,6 +54,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nudge.assistant.data.Settings
+import com.nudge.assistant.engine.Ignore
 import com.nudge.assistant.engine.Kind
 import com.nudge.assistant.engine.NEVER
 import com.nudge.assistant.engine.Nudge
@@ -249,6 +250,25 @@ private fun SettingsPage(
                 Rule()
                 Toggle("Bills due", "Payment notices, mentioned again the day before.", settings.billOn) {
                     on.settings(settings.copy(billOn = it))
+                }
+            }
+        }
+
+        item { Label("Never nudge about") }
+        item {
+            Panel {
+                // The two offered by default, plus anything else already on the list.
+                val apps = (Ignore.DEFAULTS + settings.ignoredApps).sortedBy { Ignore.name(it) }
+                apps.forEachIndexed { i, pkg ->
+                    if (i > 0) Rule()
+                    Toggle(
+                        Ignore.name(pkg),
+                        if (i == 0) "No message or bill nudges from these apps." else null,
+                        pkg in settings.ignoredApps
+                    ) { ignore ->
+                        val next = if (ignore) settings.ignoredApps + pkg else settings.ignoredApps - pkg
+                        on.settings(settings.copy(ignoredApps = next))
+                    }
                 }
             }
         }

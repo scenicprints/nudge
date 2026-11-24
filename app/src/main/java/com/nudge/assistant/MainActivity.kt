@@ -122,6 +122,8 @@ private fun Root(opens: Int) {
         settings = {
             settings = it
             Prefs.save(c, it)
+            // Ignoring an app also withdraws what it had already put on file.
+            Brain.dropIgnored(c)
             Brain.kick(c)
         },
         open = { Actions.open(c, it) },

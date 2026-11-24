@@ -65,6 +65,18 @@ class EngineTest {
         assertEquals(later + 30 * Times.MINUTE, next.fireAt)
     }
 
+    @Test fun ignoredAppsProduceNothingAndLoseWhatTheyHad() {
+        val teams = ReplyRule.onMessage(null, msg().copy(key = "k2", pkg = Ignore.TEAMS), now, 30, false)!!
+        val chat = ReplyRule.onMessage(null, msg(), now, 30, false)!!
+        assertEquals(listOf(chat), Ignore.drop(listOf(teams, chat), Ignore.DEFAULTS))
+        assertTrue(Ignore.isIgnored(Ignore.OUTLOOK, Ignore.DEFAULTS))
+        assertFalse(Ignore.isIgnored("com.chat", Ignore.DEFAULTS))
+        // A nudge with no source app, such as time to leave, is never ignored.
+        assertFalse(Ignore.isIgnored(null, Ignore.DEFAULTS))
+        // Turned back on in Settings: nothing is ignored.
+        assertEquals(listOf(teams, chat), Ignore.drop(listOf(teams, chat), emptySet()))
+    }
+
     @Test fun swipeIsNotHandledButTapIs() {
         assertTrue(ReplyRule.handledBy(1))   // click
         assertTrue(ReplyRule.handledBy(8))   // app withdrew it

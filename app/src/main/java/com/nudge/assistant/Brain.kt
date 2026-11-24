@@ -8,6 +8,7 @@ import com.nudge.assistant.data.Prefs
 import com.nudge.assistant.data.Settings
 import com.nudge.assistant.data.Store
 import com.nudge.assistant.engine.BillRule
+import com.nudge.assistant.engine.Ignore
 import com.nudge.assistant.engine.Kind
 import com.nudge.assistant.engine.LeaveRule
 import com.nudge.assistant.engine.Message
@@ -85,6 +86,12 @@ object Brain {
     }
 
     fun clear(c: Context, id: String) = change(c) { list -> list.filter { it.id != id } }
+
+    /** Drops whatever is on file from apps the user has chosen to ignore. */
+    fun dropIgnored(c: Context) {
+        val ignored = Prefs.settings(c).ignoredApps
+        change(c) { list -> Ignore.drop(list, ignored) }
+    }
 
     /** Applies a change to the store and withdraws the notification of anything it removed. */
     private fun change(c: Context, f: (List<Nudge>) -> List<Nudge>) {

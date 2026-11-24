@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.nudge.assistant.Brain
+import com.nudge.assistant.data.Prefs
+import com.nudge.assistant.engine.Ignore
 import com.nudge.assistant.engine.Message
 import java.util.concurrent.ConcurrentHashMap
 
@@ -33,6 +35,8 @@ object Live {
 class NudgeListener : NotificationListenerService() {
 
     override fun onListenerConnected() {
+        // Clears anything an ignored app left on file before it was ignored.
+        Brain.dropIgnored(this)
         runCatching { activeNotifications }.getOrNull()?.forEach(::consider)
         Brain.kick(this)
     }
@@ -50,6 +54,8 @@ class NudgeListener : NotificationListenerService() {
 
     private fun consider(sbn: StatusBarNotification) {
         if (sbn.packageName == packageName) return
+        // An ignored app is not looked at at all: no reply nudge, no bill nudge.
+        if (Ignore.isIgnored(sbn.packageName, Prefs.settings(this).ignoredApps)) return
         val n = sbn.notification ?: return
         if (n.flags and Notification.FLAG_GROUP_SUMMARY != 0) return
         if (n.flags and Notification.FLAG_ONGOING_EVENT != 0) return

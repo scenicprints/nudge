@@ -1,6 +1,7 @@
 package com.nudge.assistant.data
 
 import android.content.Context
+import com.nudge.assistant.engine.Ignore
 
 data class Settings(
     val replyOn: Boolean = true,
@@ -13,7 +14,9 @@ data class Settings(
     val leaveBufferMin: Int = 5,
     val quietOn: Boolean = true,
     val quietStart: Int = 22,
-    val quietEnd: Int = 7
+    val quietEnd: Int = 7,
+    /** Packages that never produce a reply or bill nudge. See [Ignore]. */
+    val ignoredApps: Set<String> = Ignore.DEFAULTS
 )
 
 object Prefs {
@@ -31,7 +34,9 @@ object Prefs {
             leaveBufferMin = p.getInt("leaveBufferMin", d.leaveBufferMin),
             quietOn = p.getBoolean("quietOn", d.quietOn),
             quietStart = p.getInt("quietStart", d.quietStart),
-            quietEnd = p.getInt("quietEnd", d.quietEnd)
+            quietEnd = p.getInt("quietEnd", d.quietEnd),
+            // Copied: the set SharedPreferences hands back must not be kept or changed.
+            ignoredApps = p.getStringSet("ignoredApps", null)?.toSet() ?: d.ignoredApps
         )
     }
 
@@ -46,6 +51,7 @@ object Prefs {
             .putBoolean("quietOn", s.quietOn)
             .putInt("quietStart", s.quietStart)
             .putInt("quietEnd", s.quietEnd)
+            .putStringSet("ignoredApps", s.ignoredApps)
             .apply()
     }
 

@@ -24,6 +24,11 @@ said, because a home screen is visible to anyone who can see the phone.
 
 Quiet hours hold everything overnight except time to leave.
 
+**Apps it ignores.** Teams and Outlook are ignored by default: no message or bill nudges come
+from them, because work mail and work chat are answered on work's schedule. Each can be turned
+back on under Settings, "Never nudge about". Time to leave still covers meetings in a work
+calendar, since that comes from the calendar and not from the app.
+
 Swiping a nudge away only clears the shade. The nudge stays in the app and on the widget until
 it expires or you press Done, because clearing a notification is housekeeping and not an answer.
 
